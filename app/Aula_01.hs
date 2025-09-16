@@ -1,5 +1,3 @@
-module Funcoes where
-
 {- recebe um n e retorna o numero de vendas do dia n, 
 sendo que o numero de vendas do dia n é n mod 7 -}
 vendas :: Int -> Int
