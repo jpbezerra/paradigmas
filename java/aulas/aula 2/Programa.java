@@ -1,43 +1,56 @@
 public class Programa {
     public static void main(String[] args) {
-        Banco banco = new Banco();
+        // 1. Criamos a implementação concreta do repositório (Array)
+        RepositorioContas repositorio = new RepositorioContasArray();
 
-        Poupanca poupanca1 = new Poupanca(1001);
-        banco.cadastrar(poupanca1);
+        // 2. Injetamos o repositório no Banco via construtor
+        Banco banco = new Banco(repositorio);
 
-        poupanca1.creditar(1000.0);
-        System.out.println("Saldo antes dos juros: " + banco.getSaldo(1001));
+        // --- TESTE 1: Poupança ---
+        System.out.println("=== Teste Poupança ===");
+        Poupanca poupanca = new Poupanca(1001);
+        banco.cadastrar(poupanca);
 
-        poupanca1.renderJuros(5.0);
-        System.out.println("Saldo após os juros: " + banco.getSaldo(1001));
+        banco.creditar(1001, 1000.0);
+        System.out.println("Saldo Poupanca antes dos juros: " + banco.getSaldo(1001));
 
-        Poupanca poupanca2 = new Poupanca(1002);
-        banco.cadastrar(poupanca2);
+        // O método renderJuros do Banco usa a taxa interna definida na classe Banco
+        banco.renderJuros(1001); 
+        System.out.println("Saldo Poupanca após os juros: " + banco.getSaldo(1001));
 
-        poupanca2.creditar(500.0);
-        System.out.println("Saldo da segunda poupança: " + banco.getSaldo(1002));
-
-        banco.mostrarContas();
-
-        banco.transferir(200.0, 1001, 1002);
-        System.out.println("Saldo da primeira poupança após transferência: " + banco.getSaldo(1001));
-        System.out.println("Saldo da segunda poupança após transferência: " + banco.getSaldo(1002));
-
+        // --- TESTE 2: Conta Especial (Bônus) ---
+        System.out.println("\n=== Teste Conta Especial ===");
         ContaEspecial contaEspecial = new ContaEspecial(2001);
         banco.cadastrar(contaEspecial);
 
-        contaEspecial.creditar(1000.0);
-        System.out.println("Saldo da conta especial antes do bônus: " + banco.getSaldo(2001));
+        // O crédito gera bônus internamente na conta especial
+        banco.creditar(2001, 1000.0); 
+        System.out.println("Saldo Conta Especial antes do bônus: " + banco.getSaldo(2001));
 
-        banco.renderJuros(2001, 10.0);
-        System.out.println("Saldo da conta especial após o bônus: " + banco.getSaldo(2001));
+        banco.renderBonus(2001);
+        System.out.println("Saldo Conta Especial após renderizar bônus: " + banco.getSaldo(2001));
 
-        banco.mostrarContas();
+        // --- TESTE 3: Conta Imposto (CPMF) ---
+        System.out.println("\n=== Teste Conta Imposto ===");
+        ContaImposto contaImposto = new ContaImposto(3001);
+        banco.cadastrar(contaImposto);
 
-        banco.transferir(300.0, 2001, 1001);
-        System.out.println("Saldo da conta especial após transferência: " + banco.getSaldo(2001));
-        System.out.println("Saldo da primeira poupança após receber transferência: " + banco.getSaldo(1001));
+        banco.creditar(3001, 1000.0);
+        System.out.println("Saldo Conta Imposto inicial: " + banco.getSaldo(3001));
 
-        banco.mostrarContas();
+        // O débito deve cobrar o valor + o imposto CPMF (definido na classe ContaImposto)
+        banco.debitar(3001, 100.0); 
+        System.out.println("Saldo Conta Imposto após débito de 100.0: " + banco.getSaldo(3001));
+
+        // --- TESTE 4: Transferência ---
+        System.out.println("\n=== Teste Transferência ===");
+        // Transferindo da Conta Especial (2001) para a Poupança (1001)
+        System.out.println("Saldo Origem (Especial) antes: " + banco.getSaldo(2001));
+        System.out.println("Saldo Destino (Poupanca) antes: " + banco.getSaldo(1001));
+        
+        banco.transferir(200.0, 2001, 1001);
+        
+        System.out.println("Saldo Origem (Especial) depois: " + banco.getSaldo(2001));
+        System.out.println("Saldo Destino (Poupanca) depois: " + banco.getSaldo(1001));
     }
 }

@@ -1,112 +1,109 @@
 public class Banco {
-    private Conta[] contas;
-    private int indice;
-    private double juros;
+    private RepositorioContas contas; 
+    private double taxaJuros = 0.01;
 
-    public Banco() {
-        this.contas = new Conta[100];
-        this.indice = 0;
+    public Banco(RepositorioContas rep) {
+        this.contas = rep;
     }
 
-    public boolean cadastrar(Conta conta) {
-        if (this.indice >= contas.length) {
-            System.out.println("Banco cheio: não é possível cadastrar mais contas.");
+    public boolean cadastrar(ContaAbstrata conta) {
+        String numeroStr = String.valueOf(conta.getNumero());
+        
+        if (!this.contas.existe(numeroStr)) {
+            this.contas.inserir(conta);
+            System.out.println("Conta " + conta.getNumero() + " cadastrada com sucesso.");
+            return true;
+        } else {
+            System.out.println("Erro: Conta " + conta.getNumero() + " já existe.");
             return false;
         }
-
-        this.contas[this.indice++] = conta;
-        return true;
-    }
-
-    private int buscarIndice(int numero) {
-        for (int i = 0; i < this.indice; i++) {
-            if (this.contas[i] != null && this.contas[i].getNumero() == numero) {
-                return i;
-            }
-        }
-
-        return -1;
     }
 
     public boolean creditar(int numero, double valor) {
-        int i = buscarIndice(numero);
-        if (i == -1) {
+        String numeroStr = String.valueOf(numero);
+        ContaAbstrata c = this.contas.procurar(numeroStr);
+
+        if (c == null) {
             System.out.println("Conta não encontrada: " + numero);
             return false;
         }
 
-        this.contas[i].creditar(valor);
+        c.creditar(valor);
+        this.contas.atualizar(c);
         return true;
     }
 
     public boolean debitar(int numero, double valor) {
-        int i = buscarIndice(numero);
-        
-        if (i == -1) {
+        String numeroStr = String.valueOf(numero);
+        ContaAbstrata c = this.contas.procurar(numeroStr);
+
+        if (c == null) {
             System.out.println("Conta não encontrada: " + numero);
             return false;
         }
-        
-        this.contas[i].debitar(valor);
+
+        c.debitar(valor); 
+        this.contas.atualizar(c);
         return true;
     }
 
     public double getSaldo(int numero) {
-        int i = buscarIndice(numero);
-        if (i == -1) {
+        String numeroStr = String.valueOf(numero);
+        ContaAbstrata c = this.contas.procurar(numeroStr);
+
+        if (c == null) {
             System.out.println("Conta não encontrada: " + numero);
             return 0.0;
         }
 
-        return this.contas[i].getSaldo();
+        return c.getSaldo();
     }
 
-    public void mostrarContas() {
-        for (int i = 0; i < this.indice; i++) {
-            if (this.contas[i] != null) this.contas[i].show();
+    public void renderJuros(int numero) {
+        String numeroStr = String.valueOf(numero);
+        ContaAbstrata c = this.contas.procurar(numeroStr);
+
+        if (c instanceof Poupanca) {
+            ((Poupanca) c).renderJuros(this.taxaJuros);
+            this.contas.atualizar(c); 
+            System.out.printf("Juros aplicados na Poupança %d.%n", numero);
+        } else {
+            System.out.println("Operação falhou: A conta " + numero + " não é uma Poupança ou não existe.");
         }
     }
 
-    public void renderJuros(int numero, double taxa) {
-        int i = buscarIndice(numero);
-        if (i == -1) {
-            System.out.println("Conta não encontrada: " + numero);
-            return;
-        }
+    public void renderBonus(int numero) {
+        String numeroStr = String.valueOf(numero);
+        ContaAbstrata c = this.contas.procurar(numeroStr);
 
-        if (this.contas[i] instanceof Poupanca poupanca) {
-            poupanca.renderJuros(taxa);
+        if (c instanceof ContaEspecial) {
+            ((ContaEspecial) c).renderBonus();
+            this.contas.atualizar(c); 
+            System.out.println("Bônus renderizado na Conta Especial " + numero);
         } else {
-            System.out.println("A conta número " + numero + " não é uma poupança.");
-        }
-
-        if (this.contas[i] instanceof ContaEspecial contaEspecial) {
-            contaEspecial.renderBonus();
-        } else {
-            System.out.println("A conta número " + numero + " não é uma conta especial.");
+            System.out.println("Operação falhou: A conta " + numero + " não é uma Conta Especial ou não existe.");
         }
     }
 
     public void transferir(double valor, int numeroOrigem, int numeroDestino) {
-        int iOrigem = buscarIndice(numeroOrigem);
-        int iDestino = buscarIndice(numeroDestino);
+        String numOrigemStr = String.valueOf(numeroOrigem);
+        String numDestinoStr = String.valueOf(numeroDestino);
 
-        if (iOrigem == -1) {
-            System.out.println("Conta de origem não encontrada: " + numeroOrigem);
+        ContaAbstrata origem = this.contas.procurar(numOrigemStr);
+        ContaAbstrata destino = this.contas.procurar(numDestinoStr);
+
+        if (origem == null || destino == null) {
+            System.out.println("Transferência cancelada: Conta de origem ou destino inexistente.");
             return;
         }
 
-        if (iDestino == -1) {
-            System.out.println("Conta de destino não encontrada: " + numeroDestino);
-            return;
-        }
+        origem.debitar(valor);
+        
+        destino.creditar(valor);
 
-        if (this.contas[iOrigem].getSaldo() < valor) {
-            System.out.println("Saldo insuficiente na conta de origem: " + numeroOrigem);
-            return;
-        }
+        this.contas.atualizar(origem);
+        this.contas.atualizar(destino);
 
-        this.contas[iOrigem].debitar(valor);
-        this.contas[iDestino].creditar(valor);
+        System.out.printf("Transferência de %.2f realizada de %d para %d.%n", valor, numeroOrigem, numeroDestino);
     }
 }
