@@ -2,36 +2,38 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class Balcao {
+    private String nome;
     private int capacidade;
     private Queue<Ingrediente> fila;
 
-    public Balcao(int capacidade) {
+    public Balcao(String nome, int capacidade) {
+        this.nome = nome;
         this.capacidade = capacidade;
         this.fila = new LinkedList<>();
     }
 
     public synchronized void colocar(Ingrediente ingrediente) throws InterruptedException {
         while (this.fila.size() >= this.capacidade) {
-            System.out.println(Thread.currentThread().getName() + ": Balcão CHEIO! Esperando espaço...");
+            System.out.println(Thread.currentThread().getName() + ": " + this.nome + " CHEIO! Esperando espaço...");
             wait();
         }
 
         this.fila.add(ingrediente);
         System.out.println(Thread.currentThread().getName() + " COLOCOU " + ingrediente.getNome() + 
-                           ". [Balcão: " + this.fila.size() + "/" + this.capacidade + "]");
+                           ". [" + this.nome + ": " + this.fila.size() + "/" + this.capacidade + "]");
         
         notifyAll();
     }
 
     public synchronized void retirar() throws InterruptedException {
         while (this.fila.isEmpty()) {
-            System.out.println(Thread.currentThread().getName() + ": Balcão VAZIO! Esperando ingredientes...");
+            System.out.println(Thread.currentThread().getName() + ": " + this.nome + " VAZIO! Esperando ingredientes...");
             wait();
         }
 
         Ingrediente ingrediente = this.fila.poll();
         System.out.println(Thread.currentThread().getName() + " RETIROU " + ingrediente.getNome() + 
-                           ". [Balcão: " + this.fila.size() + "/" + this.capacidade + "]");
+                           ". [" + this.nome + ": " + this.fila.size() + "/" + this.capacidade + "]");
         
         notifyAll();
     }

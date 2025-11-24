@@ -34,7 +34,7 @@ public class Main {
     }
 
     private static void iniciarSimulacao(int capacidade, int prod, int cons) {
-        Balcao balcao = new Balcao(capacidade);
+        Balcao balcao = new Balcao("Balcão Principal", capacidade);
 
         Aprendiz aprendiz = new Aprendiz(balcao, prod);
         Thread tAprendiz = new Thread(aprendiz);
