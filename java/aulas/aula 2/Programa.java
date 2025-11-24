@@ -9,7 +9,12 @@ public class Programa {
         // --- TESTE 1: Poupança ---
         System.out.println("=== Teste Poupança ===");
         Poupanca poupanca = new Poupanca(1001);
-        banco.cadastrar(poupanca);
+
+        try {
+            banco.cadastrar(poupanca);
+        } catch (ContaJaCadastrarException e) {
+            System.out.println(e.getMessage());
+        }
 
         banco.creditar(1001, 1000.0);
         System.out.println("Saldo Poupanca antes dos juros: " + banco.getSaldo(1001));
@@ -21,7 +26,12 @@ public class Programa {
         // --- TESTE 2: Conta Especial (Bônus) ---
         System.out.println("\n=== Teste Conta Especial ===");
         ContaEspecial contaEspecial = new ContaEspecial(2001);
-        banco.cadastrar(contaEspecial);
+
+        try {
+            banco.cadastrar(contaEspecial);
+        } catch (ContaJaCadastrarException e) {
+            System.out.println(e.getMessage());
+        }
 
         // O crédito gera bônus internamente na conta especial
         banco.creditar(2001, 1000.0); 
@@ -33,7 +43,12 @@ public class Programa {
         // --- TESTE 3: Conta Imposto (CPMF) ---
         System.out.println("\n=== Teste Conta Imposto ===");
         ContaImposto contaImposto = new ContaImposto(3001);
-        banco.cadastrar(contaImposto);
+
+        try {
+            banco.cadastrar(contaImposto);
+        } catch (ContaJaCadastrarException e) {
+            System.out.println(e.getMessage());
+        }
 
         banco.creditar(3001, 1000.0);
         System.out.println("Saldo Conta Imposto inicial: " + banco.getSaldo(3001));

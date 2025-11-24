@@ -4,11 +4,11 @@ public class Conta extends ContaAbstrata {
     }
 
     @Override
-    public void debitar(double valor) {
+    public void debitar(double valor) throws SaldoInsuficienteException {
         if (valor <= this.getSaldo()) {
             this.setSaldo(this.getSaldo() - valor);
         } else {
-            System.out.println("Saldo insuficiente para débito.");
+            throw new SaldoInsuficienteException("Saldo insuficiente para débito.");
         }
     }
 }

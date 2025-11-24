@@ -37,7 +37,7 @@ public class RepositorioContasArray implements RepositorioContas {
     }
 
     @Override
-    public void remover(String numero) {
+    public void remover(String numero) throws ContaNaoEncontradaException {
         int i = this.getIndice(numero);
         if (i != -1) {
             this.contas[i] = this.contas[this.indice - 1];

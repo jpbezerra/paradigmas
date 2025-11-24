@@ -6,7 +6,7 @@ public class Banco {
         this.contas = rep;
     }
 
-    public boolean cadastrar(ContaAbstrata conta) {
+    public boolean cadastrar(ContaAbstrata conta) throws ContaJaCadastrarException {
         String numeroStr = String.valueOf(conta.getNumero());
         
         if (!this.contas.existe(numeroStr)) {
@@ -14,8 +14,7 @@ public class Banco {
             System.out.println("Conta " + conta.getNumero() + " cadastrada com sucesso.");
             return true;
         } else {
-            System.out.println("Erro: Conta " + conta.getNumero() + " já existe.");
-            return false;
+            throw new ContaJaCadastrarException("Conta " + conta.getNumero() + " já existe.");
         }
     }
 
@@ -42,7 +41,13 @@ public class Banco {
             return false;
         }
 
-        c.debitar(valor); 
+        try {
+            c.debitar(valor); 
+        } catch (SaldoInsuficienteException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+
         this.contas.atualizar(c);
         return true;
     }
@@ -97,8 +102,13 @@ public class Banco {
             return;
         }
 
-        origem.debitar(valor);
-        
+        try {
+            origem.debitar(valor);
+        } catch (SaldoInsuficienteException e) {
+            System.out.println("Transferência cancelada: " + e.getMessage());
+            return;
+        }
+
         destino.creditar(valor);
 
         this.contas.atualizar(origem);

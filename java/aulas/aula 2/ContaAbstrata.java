@@ -29,5 +29,5 @@ public abstract class ContaAbstrata {
         System.out.println("Conta Número: " + this.getNumero() + ", Saldo: " + this.getSaldo());
     }
 
-    public abstract void debitar(double valor);
+    public abstract void debitar(double valor) throws SaldoInsuficienteException;
 }
